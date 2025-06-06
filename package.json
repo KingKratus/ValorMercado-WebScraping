@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index palavras",
     "dev": "vite",
-    "build": "vite build",
+    "build": "ls -la && vite build",
     "preview": "vite preview",
     "server": "node server.js",
     "dev:concurrent": "concurrently \"npm run server\" \"npm run dev\"",
