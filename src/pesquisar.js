@@ -4,16 +4,14 @@ const Mercado = require('./Mercado')
 const scrapper = require('./scrapper/produtos-scrapper')
 const cleaning = require('./cleaning/resultSplit')
 
-async function pesquisa(){
+async function pesquisa(searchTerms){
    
     const browser = await pup.openBrowser(true)
-    
-    const searchFor = ((await file.readFile("docs/searchFor/searchFor.txt")).split(',')).map(x => x.replace('\n', ''))
     
     const page = await browser.newPage();
     await pup.blockContent(page)
 
-    const mercadoClass = await new Mercado([ 'muffato'], searchFor);
+    const mercadoClass = await new Mercado([ 'muffato'], searchTerms);
 
     const scrappedProducts = await scrapper.searchProducts(mercadoClass, page)
 

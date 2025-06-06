@@ -6,8 +6,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3001', // Express server runs on 3001
         changeOrigin: true,
+        // secure: false, // Optional: Add if backend is not on HTTPS and experiencing issues
+        // No rewrite needed as frontend calls /api/* and backend expects /api/*
       },
     },
   },
