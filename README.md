@@ -13,13 +13,33 @@
 
 # Utilização
  
+ ## Web Scraping (Linha de Comando)
+ 
  Para utilizar o software, liste os produtos que quer pesquisar no arquivo em ```docs/searchFor/searchFor.txt```;
 
  Após isso, utilize o comando abaixo:
 
  ```
- npm run
+ npm start
  ```
+ 
+ ## Frontend + API (Aplicação Web)
+ 
+ 1. Configure as credenciais do Google Sheets:
+    - Copie `.env.example` para `.env`
+    - Preencha as variáveis de ambiente com suas credenciais do Google Sheets
+ 
+ 2. Inicie o servidor backend:
+    ```
+    npm run server
+    ```
+ 
+ 3. Em outro terminal, inicie o frontend:
+    ```
+    npm run dev
+    ```
+ 
+ 4. Acesse `http://localhost:5173` para usar a interface web
 
 # Nota da Versão
 
