@@ -20,29 +20,46 @@ function ResultsTable({ results }) {
               Preço
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Unidade
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Mercado
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {results.map((result, index) => (
-            <tr key={index}>
+          {flattenedResults.map((result, index) => (
+            <tr key={index} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {result.searchedTerm || 'N/A'}
+              </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {result.titulo}
+                <div className="max-w-xs truncate" title={result.titulo}>
+                  {result.titulo}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {result.produto.marca}
+                {result.produto?.marca || 'N/A'}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {result.produto?.preco ? `R$ ${result.produto.preco.toFixed(2)}` : 'N/A'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                R$ {result.produto.preco.toFixed(2)}
+                {result.produto?.valorUnidade && result.produto?.unidade 
+                  ? `${result.produto.valorUnidade}${result.produto.unidade}`
+                  : 'N/A'
+                }
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {result.mercado}
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {result.mercado || 'N/A'}
+                </span>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

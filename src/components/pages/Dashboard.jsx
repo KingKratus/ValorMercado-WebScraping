@@ -6,7 +6,8 @@ import {
   Clock, 
   DollarSign,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Search
 } from 'lucide-react';
 import StatsCard from '../ui/StatsCard';
 import RecentSearches from '../dashboard/RecentSearches';
@@ -14,26 +15,35 @@ import PriceChart from '../dashboard/PriceChart';
 import TopProducts from '../dashboard/TopProducts';
 
 function Dashboard() {
-  const { data: stats, isLoading } = useQuery('dashboard-stats', async () => {
-    // Simulated API call - replace with actual endpoint
-    return {
-      totalSearches: 1247,
-      totalProducts: 3456,
-      avgPrice: 15.67,
-      lastUpdate: new Date().toISOString(),
-      searchesGrowth: 12.5,
-      productsGrowth: -3.2,
-      priceChange: 2.1
-    };
+  const { data: statsResponse, isLoading } = useQuery('dashboard-stats', async () => {
+    const response = await fetch('/api/dashboard-stats');
+    if (!response.ok) {
+      throw new Error('Failed to fetch dashboard stats');
+    }
+    return response.json();
   });
+
+  const stats = statsResponse?.data;
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="loading-spinner"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
+
+  const formatLastUpdate = (dateString) => {
+    if (!dateString) return 'Nunca';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Há poucos minutos';
+    if (diffInHours < 24) return `Há ${diffInHours} horas`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `Há ${diffInDays} dias`;
+  };
 
   return (
     <div className="space-y-6">
@@ -76,7 +86,7 @@ function Dashboard() {
         
         <StatsCard
           title="Última Atualização"
-          value="Há 2 horas"
+          value={formatLastUpdate(stats?.lastUpdate)}
           icon={<Clock className="h-6 w-6" />}
           color="orange"
         />

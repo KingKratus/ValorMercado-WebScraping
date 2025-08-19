@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { syncToGoogleSheets } = require('./src/services/googleSheets');
+const { inserirNoBanco, getHistorico, getDashboardStats } = require('./src/query/sql');
 require('dotenv').config();
 
 const app = express();
@@ -57,6 +58,109 @@ app.post('/api/sync-sheets', async (req, res) => {
     console.error('Error syncing to Google Sheets:', error);
     res.status(500).json({ 
       error: 'Failed to sync data to Google Sheets',
+      details: error.message 
+    });
+  }
+});
+
+// Save results to database endpoint
+app.post('/api/save-results-to-db', async (req, res) => {
+  try {
+    const { data } = req.body;
+    
+    if (!data || !Array.isArray(data)) {
+      return res.status(400).json({ 
+        error: 'Invalid data format. Expected an array of products.' 
+      });
+    }
+
+    if (data.length === 0) {
+      return res.status(400).json({ 
+        error: 'No data provided to save.' 
+      });
+    }
+
+    // Flatten the data structure to match the expected format
+    const flattenedData = [];
+    
+    data.forEach(mercado => {
+      if (mercado.produtos) {
+        mercado.produtos.forEach(produto => {
+          if (produto.results) {
+            produto.results.forEach(result => {
+              flattenedData.push({
+                ...result,
+                mercado: mercado.mercado,
+                searchedTerm: produto.searchedTerm
+              });
+            });
+          }
+        });
+      }
+    });
+
+    await inserirNoBanco(flattenedData);
+    
+    res.json({ 
+      success: true, 
+      message: `Successfully saved ${flattenedData.length} products to database.`,
+      savedCount: flattenedData.length
+    });
+  } catch (error) {
+    console.error('Error saving to database:', error);
+    res.status(500).json({ 
+      error: 'Failed to save data to database',
+      details: error.message 
+    });
+  }
+});
+
+// Get historical data endpoint
+app.get('/api/history', async (req, res) => {
+  try {
+    const { page = 1, limit = 50, search = '', mercado = '' } = req.query;
+    
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    
+    const result = await getHistorico({
+      limit: parseInt(limit),
+      offset,
+      search,
+      mercado
+    });
+    
+    res.json({
+      success: true,
+      data: result.data,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: result.total,
+        totalPages: Math.ceil(result.total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching history:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch historical data',
+      details: error.message 
+    });
+  }
+});
+
+// Get dashboard statistics endpoint
+app.get('/api/dashboard-stats', async (req, res) => {
+  try {
+    const stats = await getDashboardStats();
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch dashboard statistics',
       details: error.message 
     });
   }
